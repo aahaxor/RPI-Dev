@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<!--
+  ___  _______   _   _                _ 
+ / _ \| | ___ \ | | | |              | |
+/ /_\ \ | |_/ / | |_| | ___  __ _  __| |
+|  _  | | ___ \ |  _  |/ _ \/ _` |/ _` |
+| | | |_| |_/ / | | | |  __/ (_| | (_| |
+\_| |_(_)____/  \_| |_/\___|\__,_|\__,_|
+                                        
+By Aaron Becker
+
+"This contains info on all elements of the A!B website"
+
+Feb 22, 2016                                    
+-->
+<html>
+<head>
+	<title>Aaron's Site</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content = "height = device-height, width = device-width, user-scalable = no" />
+	<script type="text/javascript" src="/webiopi.js"></script>
+    <link rel="stylesheet" href="style.css" type="text/css" media="screen" title="no title" charset="utf-8">
+    <link rel="stylesheet" href="/libraries/bootstrap.css" type="text/css" media="screen" title="no title" charset="utf-8">
+    <script src="consolestyling.js"></script>
+	<script src="/libraries/bootbox.js"></script>
+	<script src="/libraries/bootstrap.js"></script>
+	<script src="/libraries/jquery-2.2.2.js"></script>
+	<script src="/libraries/stats.js"></script>
+	<script src="/libraries/annyang.js"></script>
+	<script src="/libraries/shine.js"></script>
+	<script src="/libraries/trianglify.js"></script>
+	<script type="text/javascript" src="data.json"></script>
+	<link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon" />
+</head>
+<body class="b">
+<div id="tcanvas"></div>
+<div id="shiner">
+<div id="content" align="center"></div>
+<p id="shine">Welcome to Aaron's Website!</p></div>
+</body>
+<script id="webiopi">
+webiopi().ready(function() {
+                webiopi().setFunction(23,"out");
+                webiopi().setFunction(18,"out");
+                
+                var content, button;
+                content = $("#content");
+                
+                button = webiopi().createGPIOButton(18,"LED Demo");
+                content.append(button);
+                button = webiopi().createGPIOButton(23,"Lamp");
+                content.append(button);
+                
+        });
+</script>
+<script id="backbone">
+/*
+  ___  _______   _____      _   _   _                 
+ / _ \| | ___ \ /  ___|    | | | | (_)                
+/ /_\ \ | |_/ / \ `--.  ___| |_| |_ _ _ __   __ _ ___ 
+|  _  | | ___ \  `--. \/ _ \ __| __| | '_ \ / _` / __|
+| | | |_| |_/ / /\__/ /  __/ |_| |_| | | | | (_| \__ \
+\_| |_(_)____/  \____/ \___|\__|\__|_|_| |_|\__, |___/
+                                             __/ |    
+                                            |___/     
+
+By Aaron Becker
+
+"This is all settings for the A!B website"
+
+Feb 23, 2016
+*/
+var devmode = getCookie("devmode");
+if (devmode == "") {setCookie("devmode","false",365);}
+if (devmode == "true") {
+    //DEVELOPER MODE SETTINGS
+    console.warn("You are in developer mode."); //Ignore this <--
+var consolestyling = "debug"; //console styling options
+var stats = "debug"; //fps or ms information for site
+var statsmode = "fps"; //mode: fps or ms
+var timerate = 5; //timerate for clock updating in stats
+var speechcommands = "yes"; //allow speech commands
+var speechdebug = "debug"; //allow debug text for speech
+var repeatingnotices = "debug"; //repeating security notices for microphone
+var talktouser = "yes"; //talk to user
+var defaultvoice = "en-GB"; //default voice to talk to user, can be changed with the "switch to voice _____" command
+} else {
+    //RELEASE MODE SETTINGS
+    setTimeout(function(){console.warn("You are in release mode.");},350); //Ignore this <--
+var stats = "release"; //fps or ms information for site
+var statsmode = "fps"; //mode: fps or ms
+var timerate = 5; //timerate for clock updating in stats
+var speechcommands = "yes"; //allow speech commands
+var speechdebug = "release"; //allow debug text for speech
+var repeatingnotices = "release"; //repeating security notices for microphone
+var talktouser = "yes"; //talk to user
+var defaultvoice = "en-GB"; //default voice to talk to user, can be changed with the "switch to voice _____" command
+}
+//This is the entire backbone for A!B, but it is folded (At least in the text editor I use)
+/*
+  ___  _______  ______            _    _                      
+ / _ \| | ___ \ | ___ \          | |  | |                     
+/ /_\ \ | |_/ / | |_/ / __ _  ___| | _| |__   ___  _ __   ___ 
+|  _  | | ___ \ | ___ \/ _` |/ __| |/ / '_ \ / _ \| '_ \ / _ \
+| | | |_| |_/ / | |_/ / (_| | (__|   <| |_) | (_) | | | |  __/
+\_| |_(_)____/  \____/ \__,_|\___|_|\_\_.__/ \___/|_| |_|\___|
+                                                                                                                                                                                                           
+By Aaron Becker
+
+"This is a collection of scripts that is required in all A!B pages"
+
+Feb 22, 2016
+
+
+START OF SPEECH COMMANDS
+*/
+    if (annyang) {
+console.log("Annyang started sucessfully");
+    var commands = {
+    '(please) (computer) (please) turn (the) lamp :state': function(state) {
+        console.log("State: "+state+" State [0]: "+state[0]);
+        if (state == "on") {
+            notify("Lamp on");
+            webiopi().digitalWrite(23,1);
+            say("Lamp turned on.","");
+        } else if (state == "off") {
+            notify("Lamp off");
+            webiopi().digitalWrite(23,0);
+            say("Lamp turned off.","");
+        } else {
+            say("Invalid state.","");
+        }
+    },
+    '(please) (computer) (please) turn (the) led :state': function(state) {
+        console.log("State: "+state+" State [0]: "+state[0]);
+        if (state == "on") {
+            notify("LED on");
+            webiopi().digitalWrite(18,1);
+            say("LED turned on.","");
+        } else if (state == "off") {
+            notify("LED on");
+            webiopi().digitalWrite(18,0);
+            say("LED turned off.","");
+        } else {
+            say("Invalid state.","");
+        }
+    },
+    '(please) (computer) (please) say hello to *name': function(name) {
+        var utterance = new SpeechSynthesisUtterance();
+        utterance.text = 'Hello '+name+"!";
+        utterance.lang = defaultvoice;
+        utterance.rate = 1.2; 
+        speechSynthesis.speak(utterance);
+    },
+
+    '(please) (computer) (please) i love you (computer)': function() {
+        var utterance = new SpeechSynthesisUtterance();
+        utterance.text = 'I love you too.';
+        utterance.lang = defaultvoice;
+        utterance.rate = 0.3; 
+        speechSynthesis.speak(utterance);
+    },
+
+    '(please) (computer) (please) hello (world)': function() {
+        say("Hello to you too!","");
+    },
+
+    '(computer) shut up': function() {
+        say("Well goodbye then!","");
+        document.body.innerHTML = '';
+    },
+
+    '(please) (computer) (please) make some noise for :seconds second(s)': function(seconds) {
+        if (seconds == "one") {
+            seconds = 1;
+        } else if (seconds == "two") {
+            seconds = 2;
+        } else if (seconds == "three") {
+            seconds = 3;
+        } else if (seconds == "four") {
+            seconds = 4;
+        } else if (seconds == "five") {
+            seconds = 5;
+        } else if (seconds == "six") {
+            seconds = 6;
+        } else if (seconds == "seven") {
+            seconds = 7;
+        } else if (seconds == "eight") {
+            seconds = 8;
+        } else if (seconds == "nine") {
+            seconds = 9;
+        } else {
+        seconds = Number(seconds);
+    }
+    say("Ok.","");
+        if (seconds == "" || seconds == "undefined") {seconds = 5000;} else {seconds = seconds*1000;}
+        var audio = new Audio('/audio/Crowd_Cheer.mp3');
+        audio.play(); setTimeout(function() {audio.pause();},seconds)
+    },
+
+     '(please) (computer) (please) play (some) dubstep for :seconds second(s)': function(seconds) {
+        if (seconds == "one") {
+            seconds = 1;
+        } else if (seconds == "two") {
+            seconds = 2;
+        } else if (seconds == "three") {
+            seconds = 3;
+        } else if (seconds == "four") {
+            seconds = 4;
+        } else if (seconds == "five") {
+            seconds = 5;
+        } else if (seconds == "six") {
+            seconds = 6;
+        } else if (seconds == "seven") {
+            seconds = 7;
+        } else if (seconds == "eight") {
+            seconds = 8;
+        } else if (seconds == "nine") {
+            seconds = 9;
+        } else if (seconds == "thirty") {
+            seconds = 30;
+        } else if (seconds == "sixty") {
+            seconds = 60;
+        } else if (seconds == "one hundred twenty") {
+            seconds = 120;
+        } else {
+        seconds = Number(seconds);
+    }
+    say("Ok.","");
+        if (seconds == "" || seconds == "undefined") {seconds = 5000;} else {seconds = seconds*1000;}
+        var audio2 = new Audio('/audio/Virtual_Riot_Energy_Drink.mp3');
+        audio2.play(); setTimeout(function() {audio2.pause();},seconds)
+    },
+
+    '(computer) execute function :run (from cookie :cget)': function(run, cget) {
+        try {
+            run(); say("Function run successfully!","en-GB");
+        } catch (err) {
+
+            sim = getCookie(cget);
+            if (sim == "" || sim == undefined || sim == null) {setCookie(cget,"",365); say("I'm sorry, that function does not exsist.");}
+            executeFunction(run, sim);
+        }
+    },
+
+    '(please) (computer) (please) what is your name': function() {
+       var utterance = new SpeechSynthesisUtterance();
+        utterance.text = 'My name is whatever you wish it to be.';
+        utterance.lang = defaultvoice;
+        utterance.rate = 1.2; 
+        speechSynthesis.speak(utterance);
+    },
+
+    '(please) (computer) (please) (generate) (create) (a) (another) backround': function() {
+    var pattern = Trianglify({
+        height: window.innerHeight,
+        width: window.innerWidth,
+        cell_size: 40,
+        variance: 1,
+        x_colors: 'random'
+    });
+var tcanvas = pattern.canvas();
+tcanvas.id = "trianglify";
+    document.body.appendChild(tcanvas);
+    say("Created backround successfully","");
+    },
+
+    '(please) (computer) (please) delete (the) backround': function() {
+    var element = document.getElementById("trianglify");
+    element.parentNode.removeChild(element);
+    say("Deleted successfully","");
+    },
+
+    '(please) (computer) (please) search (on the internet) for *search': function(search) {
+        // old, error thrown but works: bootbox.alert(searchFlickr(search)); say("Here you are!");
+        searchFlickr(search); //search from custom function that pushes images from public feed (no key reqd.) to bootbox dialog. look towards bottom or document for function
+    },
+
+    '(computer) i like it': function() {
+    say("You are very welcome", "");
+    },
+
+    '(please) (computer) (please) (what is) (tell me) the time': function() {
+    var date = new Date(); //get date
+    var hours = date.getHours(); //get hours
+    var minutes = date.getMinutes(); //get minutes
+    var ampm = hours >= 12 ? 'pm' : 'am'; //decide am/pm
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? '0'+minutes : minutes;
+    var strTime = hours + ':' + minutes + ' ' + ampm; //make the time
+    var dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
+  "Sunday"];
+    var monthNames = ["January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"];
+    slowersay(strTime+ " " + dayNames[(new Date()).getDay()] + " "+ monthNames[(new Date()).getMonth()] + " " + (new Date()).getDate() + " " + (new Date()).getFullYear(), "");//say this
+    },
+
+    '(computer) (please) reload the page': function() {
+    say("Ok","");
+    window.location.reload();
+    },
+
+    'computer': function() {
+    say("yes?","");
+    },
+
+    '(please) (computer) (please) (generate) (shine) (generation) Jas logo': function() {
+        var center = document.createElement("center");
+        var webtext = document.createElement("p");
+        center.appendChild(webtext);
+        var webnode = document.createTextNode("Welcome to Aaron's Website!");
+        webtext.id = "shine";
+        webtext.size = "85px";
+        webtext.color = "007200";
+        webtext.align = "center";
+        webtext.appendChild(webnode);
+        document.body.appendChild(webtext);
+
+    var config = new shinejs.Config({
+        numSteps: 5,
+        opacity: 1,
+        opacityPow: 1.2,
+        offset: 0.15,
+        offsetPow: 1.8,
+        blur: 40,
+        blurPow: 1,
+        shadowRGB: new shinejs.Color(0, 100, 150)
+});//set up some configuration options
+var shineA = new shinejs.Shine(document.getElementById('shine')); //Init shine on p id shine
+
+shineA.config = config; //set shine config to the config set above
+
+window.addEventListener('mousemove', function(event) {//listener to change light orientation
+  shineA.light.position.x = event.clientX;
+  shineA.light.position.y = event.clientY;
+  shineA.draw();
+}, false);
+        say("Here you are!", "");
+    },
+
+    '(please) (computer) (please) delete shine Jas logo': function() {
+        var element = document.getElementById("shine");
+        element.parentNode.removeChild(element);
+        say("Deleted successfully","");
+    },
+
+    '(please) (computer) (please) who are you': function() {
+       var utterance = new SpeechSynthesisUtterance();
+        utterance.text = 'I am whoever you want me to be.';
+        utterance.lang = defaultvoice;
+        utterance.rate = 1.2; 
+        speechSynthesis.speak(utterance); 
+    },
+
+    '(please) (computer) (please) what are you': function() {
+       var utterance = new SpeechSynthesisUtterance();
+        utterance.text = 'I am a computer.';
+        utterance.lang = defaultvoice;
+        utterance.rate = 1.2; 
+        speechSynthesis.speak(utterance); 
+    },
+
+    '(please) (computer) (please) switch voice to :newvoice': function(newvoice) {
+        var finalvoice = "";
+        var tosay = "";
+        var bad = 0;
+        if (newvoice == "british" || newvoice == "British") {
+            newvoice = "Google UK English Male";
+        } else if (newvoice == "english" || newvoice == "English") {
+            newvoice = "Google US English";
+        } else if (newvoice == "spanish" || newvoice == "Spanish") {
+            newvoice = "Google espa\xF1ol";
+        } else if (newvoice == "french" || newvoice == "French") {
+            newvoice = "Google fran\xE7ais";
+        } else if (newvoice == "italian" || newvoice == "Italian") {
+            newvoice = "Google italiano";
+        } else if (newvoice == "dutch" || newvoice == "Dutch") {
+            newvoice = "Google Deutsch";
+        }
+
+         //Did not add japanese and chinese voices
+
+        /* else if (newvoice == "" || newvoice == "") {
+            newvoice = "";
+        } */ //For adding if you want to add one of your own
+
+        var voices = speechSynthesis.getVoices();
+        for (i=0; i<voices.length; i++) {
+            if (newvoice == voices[i].name) {
+                finalvoice = voices[i].lang; bad = 0; break;
+            } else {
+                bad = 1;
+            }
+        }
+        if (bad == 1) {
+            say("I'm sorry, that voice is not available.","");
+            console.log("Got "+newvoice+" str for voice?");
+        } else {defaultvoice = finalvoice; say("Updated Voice to "+newvoice,""); console.log("Updated voice code is "+finalvoice+" and name is "+newvoice);}
+    },
+
+    '(please) (computer) (please) say *whattosay': function(whattosay) {
+        say(whattosay,"");
+    },
+
+    '(please) (computer) (please) set mode (to) :mode': function(mode) {
+        if (mode == "developer") {
+            say("Set mode to developer successfully.", "");
+            setCookie("devmode","true",365); window.location.reload();
+        } else if (mode == "release") {
+            say("Set mode to release successfully.", "");
+            setCookie("devmode","false",365); window.location.reload();
+        } else {
+            say("I did not recognize that mode. Try again.", "");
+        }
+    },
+
+    '(please) (computer) (please) help': function() {
+        say("The commands that you can do are:","");
+        for (i=0; i<Object.keys(commands).length-1; i++) { //did the minus 1 because i don't want it to say the help command. if you add a command, make sure the help command is always last
+            say(Object.keys(commands)[i],"");
+        }
+    }
+    };
+
+    var greeting = function(name) {
+        var utterance = new SpeechSynthesisUtterance();
+        utterance.text = 'Hello, '+name+"!";
+        utterance.lang = defaultvoice;
+        utterance.rate = 1.2; 
+        speechSynthesis.speak(utterance);
+     }
+
+     var say = function(text,voice) { //DO NOT DELETE this function, all of the talking depends on it
+        if (voice == "" || voice == "undefined" || voice == "null") {voice = defaultvoice;}
+        var utterance = new SpeechSynthesisUtterance();
+        utterance.text = text;
+        utterance.lang = voice;
+        utterance.rate = 1.2; 
+        speechSynthesis.speak(utterance);
+     }
+
+     var slowersay = function(text,voice) { //DO NOT DELETE this function, time talking depends on it
+        if (voice == "" || voice == "undefined" || voice == "null") {voice = defaultvoice;}
+        var utterance = new SpeechSynthesisUtterance();
+        utterance.text = text;
+        utterance.lang = voice;
+        utterance.rate = 0.9; 
+        speechSynthesis.speak(utterance);
+     }
+
+    annyang.addCommands(commands); //add commands
+
+    annyang.start(); //begin listening
+
+    if (speechdebug = "debug") {
+        annyang.debug();
+    }
+
+    } else {
+        throw "SpeechError: Could not find required file(s) annyang.js";
+    }
+
+/*
+START OF COOKIE FUNCTION ACCESSING
+*/
+
+// end of functiondef ¿ Beginning of functiondef Ó beginning of script Ò end of script Example: executeFunction("hello", "¿helloÓalert('hello');Ò");
+var executeFunction = function(tofind, fromwhat) {
+    var beginning, end, scriptbeginning, scriptend, exectscript, scriptbeg, sp = "";
+                beginning = fromwhat.indexOf("¿");
+                end = fromwhat.indexOf(""); console.log(end);
+               if (beginning == -1 || end == -1) {
+                alert("I'm sorry, that function does not exsist."); 
+            } else {
+                funct = fromwhat.slice(beginning+1,end);
+                if (funct == tofind) {
+                alert("Successfully found the function "+funct+". Now executing.");
+                scriptbeginning = fromwhat.slice(end+1,end+2);
+                if (scriptbeginning == "Ó") {
+                    scriptend = fromwhat.indexOf("Ò");
+                    scriptbeg = fromwhat.indexOf("Ó");
+                    exectscript = fromwhat.slice(scriptbeg+1,scriptend); console.log(scriptbeg+" "+scriptend);
+                    var sp = exectscript.split(";"); var len = sp.length-1; for(i=0; i<len; i++) {try {
+    eval(sp[i]+";");
+}
+catch(err) {
+    alert("Error on command "+sp[i]+";"+" was as follows: "+err.message);}}
+                    alert("Run script successfully.");
+                } else {
+                    alert("No Script declaration inside function! Exiting."); 
+                }
+            } else {
+                scriptend = fromwhat.indexOf("Ò");
+                fromwhat = fromwhat.slice(scriptend+1);
+                executeFunction(tofind);
+            }
+
+            }
+}
+/*
+END OF COOKIE FUNCTION ACCESSING
+*/
+
+/*
+START OF STATS INIT
+*/
+var interval = "";
+var dostats = {
+        init: function () {
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.left = '0px';
+            stats.domElement.style.top = '0px';
+            document.body.appendChild(stats.domElement);    
+        },
+        startTimer: function () {
+            interval = setInterval(function(){stats.update();},timerate);
+        },
+
+        endTimer: function () {
+            clearInterval(interval);
+        },
+
+        updateTimer: function (newrate) {
+            timerate = newrate;
+            clearInterval(interval);
+            interval = setInterval(function(){stats.update();},timerate);
+        },
+        setMode: function(mode) {
+        if(mode == "fps") {
+            stats.setMode(0);
+        } else if(mode == "ms") {
+            stats.setMode(1);
+        } else {
+            console.error("Your choices are: fps or ms. Make sure you put them in quotes!");
+        }
+        }
+    };
+
+if (stats == "debug") {
+        var stats = new Stats(); 
+        dostats.init();
+        dostats.startTimer();
+    if (statsmode == "fps"){
+        stats.setMode(0);
+        } 
+    else {
+        stats.setMode(1);
+        }
+}
+/*
+END OF STATS INIT
+*/
+/*
+START OF COOKIE ACCESS
+*/
+function setCookie(cname,cvalue,exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires=" + d.toGMTString();
+    document.cookie = cname+"="+cvalue+"; "+expires;
+}
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1);
+        if (c.indexOf(name) != -1) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+/*
+END OF COOKIE ACCESS
+*/
+/*
+START OF CONSOLE WELCOME MESSAGE
+*/
+var version = JSON.parse(data);
+version = version[0].version;
+if(consolestyling == "debug") {
+console.info('%c %cW%ce%cl%cc%co%cm%ce %ct%co %ct%ch%ce %cS%ce%cc%cu%cr%ce %cL%co%cg%ci%cn %cP%ca%cn%ce%cl%c, %cb%cy %cA%ca%cr%co%cn %cB%ce%cc%ck%ce%cr%c, %cB%ce%ct%ca %cV%c%s%c%s ' , 'background: #222;' , 'background: #222; color: #FF0000', 'background: #222; color: #FF8000' , 'background: #222; color: #FFFF00', 'background: #222; color: #40FF00', 'background: #222; color: #0080FF' , 'background: #222; color: #4000FF' , 'background: #222; color: #BF00FF' , 'background: #222; color: #FF0000' , 'background: #222; color: #FF8000' , 'background: #222; color: #FFFF00', 'background: #222; color: #40FF00', 'background: #222; color: #0080FF' , 'background: #222; color: #4000FF' , 'background: #222; color: #BF00FF' , 'background: #222; color: #FF0000', 'background: #222; color: #FF8000' , 'background: #222; color: #FFFF00', 'background: #222; color: #40FF00', 'background: #222; color: #0080FF' , 'background: #222; color: #4000FF' , 'background: #222; color: #BF00FF' , 'background: #222; color: #FF0000', 'background: #222; color: #FF8000' , 'background: #222; color: #FFFF00', 'background: #222; color: #40FF00', 'background: #222; color: #0080FF' , 'background: #222; color: #4000FF' , 'background: #222; color: #BF00FF', 'background: #222; color: #FF0000', 'background: #222; color: #FF8000' , 'background: #222; color: #FFFF00', 'background: #222; color: #40FF00', 'background: #222; color: #0080FF' , 'background: #222; color: #4000FF' , 'background: #222; color: #BF00FF', 'background: #222; color: #FF0000', 'background: #222; color: #FF8000' , 'background: #222; color: #FFFF00', 'background: #222; color: #40FF00', 'background: #222; color: #0080FF' , 'background: #222; color: #4000FF' , 'background: #222; color: #BF00FF', 'background: #222; color: #FF0000', 'background: #222; color: #FF8000' , 'background: #222; color: #FFFF00', 'background: #222; color: #40FF00', 'background: #222; color: #0080FF' , 'background: #222; color: #4000FF' , 'background: #222; color: #BF00FF' , version.substring(0,1).toString() , 'background: #222; color: #FF0000' , version.substring(1,2).toString());
+} else {
+    setTimeout(function(){console.info("%cWelcome to the A!B Website, by Aaron Becker, Beta V"+version, consolecss);}, 500);
+}
+/*
+END OF CONSOLE WELCOME MESSAGE
+*/
+/*
+BEGIN FLICKR PHOTO SEARCH IMPLEMENTATION
+*/
+
+function searchFlickr(data){                 
+var origdata = data;
+            // JSON API to access Flickr
+            $.getJSON("http://api.flickr.com/services/feeds/photos_public.gne?tags="+data+"&format=json&jsoncallback=?", displayImages);
+
+            function displayImages(data) {                                                                                                                                 
+                var iCount = 0;                             
+                var htmlString = "<div class=row>";                 
+
+                $.each(data.items, function(i,item){
+                    if (iCount < 9) {
+                        var sourceSquare = (item.media.m).replace("_m.jpg", "_q.jpg");      
+
+                        htmlString += '<a class="btn" data-toggle="modal" data-target="#myModal">';
+                        htmlString += '<img src="' + sourceSquare + '">';
+                        htmlString += '</a>';
+                    }
+                    iCount++;
+                });     
+
+            // HTML into #images DIV
+            //$('#images').html(htmlString + "</div>");
+            var imgs = "";
+            imgs = imgs+=htmlString;
+            bootbox.alert("You searched for <b>"+origdata+"</b> and came up with:"+"<br>"+imgs);
+
+            // Close down the JSON function call
+            }
+say("Searched for "+origdata+" successfully.","");
+        // End jQuery function
+        }
+
+/*
+END FLICKR PHOTO SEARCH IMPLEMENTATION
+*/
+/*
+START OF NOTIFICATION IMPLEMENTATION
+*/
+var apermission = "";
+var permission = "denied";
+function notify(notif,newpermissions) {
+    if (newpermissions == "true" || newpermissions == "false") {
+        if (newpermissions == "true") {
+        setCookie("asound",true,365);
+        apermission = "true";
+    } else {
+        setCookie("asound",false,365);
+        apermission = "false";
+    }
+        console.log("New permissions set: "+newpermissions);
+    } else {
+        console.log("No new permissions set or value not recognised")
+    }
+  if (!("Notification" in window)) {
+    say("This browser does not support desktop notification, there will be none","");
+  }
+  else if (Notification.permission === "granted") {
+    var notification = new Notification(notif);
+    if (apermission == "true") {
+            var notifaudio = new Audio('/audio/Notification.mp3');
+            notifaudio.play();
+        }
+  }
+  else if (Notification.permission == 'denied') {
+    say("Please allow these notifications and sounds.","");
+    Notification.requestPermission(function (permission) {
+      if(!('permission' in Notification)) {
+        Notification.permission = permission;
+        };
+      })
+
+      if (permission === "granted") {
+        var notification = new Notification(notif);
+        if (apermission == "true") {
+            var notifaudio = new Audio('/audio/Notification.mp3');
+            notifaudio.play();
+        }
+      }
+  }
+        if (getCookie("asound") === "") {
+            say("Enable notification sound alert?","");
+            console.log("No cookie for sound permissions found, prompting, curval1:"+getCookie("asound")+" curval2:"+apermission);
+        bootbox.confirm("Click OK to allow sound.", function(result) {
+        if (result) {
+            apermission = "true";
+            setCookie("asound",true,365);
+            console.log("Set cookie asound to true");
+        } else {
+            apermission = "false";
+            setCookie("asound",false,365);
+            console.log("Set cookie asound to false");
+        }
+        console.log("apermission = "+apermission);
+    });
+} else if (apermission == ""){
+    if (getCookie("asound") == "true" || getCookie("asound") == "false") {
+        console.log("Found cookie for sound, value = "+getCookie("asound")+".");
+        apermission = getCookie("asound");
+        console.log("apermission = "+apermission);
+    } else {
+        bootbox.alert("FATALERROR: Notification sound cookie value not recognised, value = "+getCookie("asound")+".");
+    }
+}
+}
+setTimeout(function(){notify("Test notification!","true");},200);
+/*
+END OF NOTIFICATION IMPLEMENTATION
+*/
+</script>
+<script id="init">
+//init stuff
+var tcanvas = document.getElementById('tcanvas');
+var dimensions = tcanvas.getClientRects()[0];
+var pattern = Trianglify({
+        height: dimensions.height-3,//for the border of orange (2px, 1px for padding)
+        width: dimensions.width-3,
+        cell_size: 40,
+        variance: 1,
+        x_colors: 'random'
+    });
+tcanvas.appendChild(pattern.canvas());
+/*var shine = document.getElementById("shine");
+    var center = document.createElement("center");
+        var webtext = document.createElement("p");
+        shine.appendChild(center.appendChild(webtext));
+        var webnode = document.createTextNode("Welcome to Aaron's Website!");
+        webtext.id = "shine";
+        webtext.size = "85px";
+        webtext.color = "007200";
+        webtext.align = "center";
+        webtext.appendChild(webnode);
+        shine.appendChild(webtext);*/
+
+    var config = new shinejs.Config({
+        /*numSteps: 5,
+        opacity: 1,
+        opacityPow: 1.2,
+        offset: 0.15,
+        offsetPow: 1.8,
+        blur: 40,
+        blurPow: 1,
+        shadowRGB: new shinejs.Color(0, 100, 150)*/
+        numSteps: 14,
+        opacity: 0.15,
+        opacityPow: 1.2,
+        offset: 0.15,
+        offsetPow: 1,
+        blur: 20,
+        blurPow: 0.6,
+        shadowRGB: new shinejs.Color(0, 100, 150)
+});//set up some configuration options
+var shineA = new shinejs.Shine(document.getElementById('shine')); //Init shine on p id shine
+
+shineA.config = config; //set shine config to the config set above
+
+window.addEventListener('mousemove', function(event) {//listener to change light orientation
+  shineA.light.position.x = event.clientX;
+  shineA.light.position.y = event.clientY;
+  shineA.draw();
+}, false);
+</script>
+</html>

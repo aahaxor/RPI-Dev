@@ -1,0 +1,87 @@
+/*
+  ___  _______   _____     _ _ 
+ / _ \| | ___ \ |_   _|   (_) |
+/ /_\ \ | |_/ /   | | __ _ _| |
+|  _  | | ___ \   | |/ _` | | |
+| | | |_| |_/ /   | | (_| | | |
+\_| |_(_)____/    \_/\__,_|_|_|
+                                                                                            
+By Aaron Becker
+
+"This formats all elements of the A!B website"
+
+Feb 22, 2016                                                          
+*/
+button {
+        				display: block;
+        				position: relative;
+        				margin: 10px;
+        				padding: 0 10px;
+        				text-align: center;
+        				text-decoration: none;
+        				width: 130px;
+        				height: 40px;
+        				font: bold 18px/25px Arial, sans-serif;    				
+        				color: black;
+        				
+        				text-shadow: 1px 1px 1px rgba(255,255,255, .22);
+        				-webkit-border-radius: 30px;
+   						-moz-border-radius: 30px;
+    					border-radius: 30px;
+ 
+    					-webkit-box-shadow: 1px 1px 1px rgba(0,0,0, .29), inset 1px 1px 1px rgba(255,255,255, .44);
+    					-moz-box-shadow: 1px 1px 1px rgba(0,0,0, .29), inset 1px 1px 1px rgba(255,255,255, .44);
+    					box-shadow: 1px 1px 1px rgba(0,0,0, .29), inset 1px 1px 1px rgba(255,255,255, .44);
+ 
+    					-webkit-transition: all 0.30s ease;
+    					-moz-transition: all 0.30s ease;
+    					-o-transition: all 0.30s ease;
+    					-ms-transition: all 0.30s ease;
+    					transition: all 0.30s ease;
+        		}
+input[type="range"] {
+        				display: block;
+        				width: 160px;
+        				height: 45px;
+        		}
+#gpio18.LOW {
+        				background-color: Red;
+        				color: Black;
+        		}
+        		
+#gpio18.HIGH {
+        				background-color: Green;
+        				color: LightGray;
+        		}
+#gpio23.LOW {
+                        background-color: Red;
+                        color: Black;
+                }
+                
+#gpio23.HIGH {
+                        background-color: Green;
+                        color: LightGray;
+                }
+#content
+	{
+		z-index: 1000;
+	}
+#shine
+	{
+		font-size: 85px;
+		color:#007200;
+		z-index: 999;
+		padding:20px;
+		text-align: center;
+		-webkit-text-fill-color: #007200; /* Will override color (regardless of order) */
+   		-webkit-text-stroke-width: 2px;
+   		-webkit-text-stroke-color: orange;
+   		-webkit-animation: colorchange 1s infinite;
+	}
+#tcanvas
+	{
+	position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    border: 2px solid orange;
+    z-index: -1;
+	}
