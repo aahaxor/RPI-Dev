@@ -48,8 +48,10 @@ webiopi().ready(function() {
                 content = $("#content");
                 
                 button = webiopi().createGPIOButton(18,"LED Demo");
+                button.id = "ledButton";
                 content.append(button);
                 button = webiopi().createGPIOButton(23,"Lamp");
+                button.id = "lampButton";
                 content.append(button);
                 
         });
