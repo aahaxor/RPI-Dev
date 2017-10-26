@@ -66,7 +66,7 @@ input[type="range"] {
 	{
 		z-index: 1000;
 	}
-#shine
+.shine
 	{
 		font-size: 85px;
 		color:#007200;
@@ -78,6 +78,50 @@ input[type="range"] {
    		-webkit-text-stroke-color: orange;
    		-webkit-animation: colorchange 1s infinite;
 	}
+.version
+    {
+        font-size: 13px;
+        color:#007200;
+        z-index: 999;
+        padding:20px;
+        text-align: center;
+        -webkit-text-fill-color: #007200; /* Will override color (regardless of order) */
+        -webkit-text-stroke-width: 0.3px;
+        -webkit-text-stroke-color: orange;
+        -webkit-animation: colorchange 1s infinite;
+    }
+.header
+    {
+        color:#007200;
+        z-index: 999;
+        padding:20px;
+        text-align: center;
+        -webkit-text-fill-color: #007200; /* Will override color (regardless of order) */
+        -webkit-text-stroke-width: 1px;
+        -webkit-text-stroke-color: orange;
+        -webkit-animation: colorchange 1s infinite;
+    }
+.sheader
+    {
+        color:#007200;
+        z-index: 999;
+        padding:20px;
+        text-align: center;
+        -webkit-text-fill-color: #007200; /* Will override color (regardless of order) */
+        -webkit-text-stroke-width: 0.4px;
+        -webkit-text-stroke-color: orange;
+        -webkit-animation: colorchange 1s infinite;
+    }
+.normal
+    {
+        font-size: 15px;
+        color:#007200;
+        z-index: 999;
+        padding:20px;
+        text-align: left;
+        -webkit-text-fill-color: #007200; /* Will override color (regardless of order) */
+        -webkit-animation: colorchange 1s infinite;
+    }
 #tcanvas
 	{
 	position: absolute;

@@ -142,7 +142,8 @@
         case 'service-not-allowed':
           // if permission to use the mic is denied, turn off auto-restart
           autoRestart = false;
-          throw "Don't turn off the mic, speech recognicion needs it"; //this code was added by Aaron
+          try{say("Speech Recognition is disabled! Please enable microphone use!","")}catch(e){console.warn("No say function on MicError")} //This was added by Aaron
+          throw "MicError: Don't turn off the mic, speech recognicion needs it"; //this code was added by Aaron
           // determine if permission was denied by user or automatically.
           if (new Date().getTime()-lastStartedAt < 200) {
             invokeCallbacks(callbacks.errorPermissionBlocked);
@@ -153,7 +154,7 @@
         }
       };
 
-      recognition.onend     = function() {
+      recognition.onend = function() {
         invokeCallbacks(callbacks.end);
         // annyang will auto restart if it is closed automatically and not by user action.
         if (autoRestart) {
@@ -167,7 +168,7 @@
         }
       };
 
-      recognition.onresult  = function(event) {
+      recognition.onresult = function(event) {
         invokeCallbacks(callbacks.result);
         var results = event.results[event.resultIndex];
         var commandText;

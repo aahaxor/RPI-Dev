@@ -11,9 +11,10 @@ By Aaron Becker
 
 "This contains info on all elements of the A!B website"
 
-Feb 22, 2016                                    
+Jun 10, 2016                                    
 -->
 <html>
+<!--Welcome to my website! Please check out the code below, and enjoy! Thanks for checking it out!-->
 <head>
 	<title>Aaron's Site</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -26,6 +27,7 @@ Feb 22, 2016
 	<script src="/libraries/bootbox.js"></script>
 	<script src="/libraries/bootstrap.js"></script>
 	<script src="/libraries/jquery-2.2.2.js"></script>
+    <script src="/libraries/helpLib.js"></script>
 	<script src="/libraries/stats.js"></script>
 	<script src="/libraries/annyang.js"></script>
 	<script src="/libraries/shine.js"></script>
@@ -34,26 +36,49 @@ Feb 22, 2016
 	<link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon" />
 </head>
 <body class="b">
-<div id="tcanvas"></div>
-<div id="shiner">
-<div id="content" align="center"></div>
-<p id="shine">Welcome to Aaron's Website!</p></div>
+    <div id="tcanvas"></div>
+    <div id="content">
+        <div id="welcome" align="center">
+            <p id="shine" class="shine">Welcome to Aaron's Website!</p>
+        </div>
+        </div>
+        <p id="info" class="version">INSERT VERSION INFO HERE</p>
+        <p id="micEnabled" class="version">INSERT MIC INFO HERE</p>
+        <div id="main" class="normal">
+            <h1 class="header">Aaron's Site: Cool Features</h1>
+            <h3 class="sheader">Voice Recognition</h3>
+            <br>
+            <p>Try saying "hi" and see what happens :) Make sure to allow microphone usage!</p>
+            <p>Then, try (make sure to over-enunciate) "turn lamp on".</p>
+            <p>Almost lastly, try saying "notify hello in ten seconds". See what happens!</p>
+            <p>Lastly, try saying "Computer, do you have a crush on Siri?" :D</p>
+            <br>
+            <h3 class="sheader">GPIO Buttons</h3>
+            <p>Here is some buttons that control the GPIO of the Raspberry Pi, using WebIoPi:</p>
+            <div id="gpioButtons">
+            </div>
+            <p>More Coming Soon! (Once Aaron stops being lazy and finally finishes this page)</p>
+        </div>
+    </div>
+
 </body>
 <script id="webiopi">
+
 webiopi().ready(function() {
                 webiopi().setFunction(23,"out");
                 webiopi().setFunction(18,"out");
                 
                 var content, button;
-                content = $("#content");
+                content = $("#gpioButtons");
                 
                 button = webiopi().createGPIOButton(18,"LED Demo");
-                button.id = "ledButton";
                 content.append(button);
                 button = webiopi().createGPIOButton(23,"Lamp");
-                button.id = "lampButton";
                 content.append(button);
-                
+
+                document.getElementById("gpio18").style.width = "auto";
+                document.getElementById("gpio23").style.width = "auto";
+
         });
 </script>
 <script id="backbone">
@@ -73,11 +98,13 @@ By Aaron Becker
 
 Feb 23, 2016
 */
+var oldHTML = document.body.innerHTML;
 var devmode = getCookie("devmode");
 if (devmode == "") {setCookie("devmode","false",365);}
 if (devmode == "true") {
     //DEVELOPER MODE SETTINGS
     console.warn("You are in developer mode."); //Ignore this <--
+var testNotification = true;
 var consolestyling = "debug"; //console styling options
 var stats = "debug"; //fps or ms information for site
 var statsmode = "fps"; //mode: fps or ms
@@ -87,9 +114,11 @@ var speechdebug = "debug"; //allow debug text for speech
 var repeatingnotices = "debug"; //repeating security notices for microphone
 var talktouser = "yes"; //talk to user
 var defaultvoice = "en-GB"; //default voice to talk to user, can be changed with the "switch to voice _____" command
+var reloadOnResize = false;
 } else {
     //RELEASE MODE SETTINGS
     setTimeout(function(){console.warn("You are in release mode.");},350); //Ignore this <--
+var testNotification = false;
 var stats = "release"; //fps or ms information for site
 var statsmode = "fps"; //mode: fps or ms
 var timerate = 5; //timerate for clock updating in stats
@@ -98,6 +127,7 @@ var speechdebug = "release"; //allow debug text for speech
 var repeatingnotices = "release"; //repeating security notices for microphone
 var talktouser = "yes"; //talk to user
 var defaultvoice = "en-GB"; //default voice to talk to user, can be changed with the "switch to voice _____" command
+var reloadOnResize = false;
 }
 //This is the entire backbone for A!B, but it is folded (At least in the text editor I use)
 /*
@@ -141,12 +171,80 @@ console.log("Annyang started sucessfully");
             webiopi().digitalWrite(18,1);
             say("LED turned on.","");
         } else if (state == "off") {
-            notify("LED on");
+            notify("LED off");
             webiopi().digitalWrite(18,0);
             say("LED turned off.","");
         } else {
             say("Invalid state.","");
         }
+    },
+    '(please) (computer) (please) (play the pattern) (play sequence) SOS (type) (on) lamp': function() {
+        var sequence = "01010100110011001100101010" // S.O.S.
+        // output sequence on gpio 23 with a 210ms period
+        webiopi().outputSequence(23, 210, sequence, sequenceCallback);
+    },
+    '(please) (computer) (please) (play the pattern) (play sequence) SOS (type) (on) LED': function() {
+        var sequence = "01010100110011001100101010" // S.O.S.
+        // output sequence on gpio 18 with a 210ms period
+        webiopi().outputSequence(18, 210, sequence, sequenceCallback);
+    },
+    'vir semper bonus *rest': function(rest) {
+        say("I'm glad you think that!","");
+    },
+    '(please) (computer) (please) go away': function() {
+        say("Well, fine then.","");
+        setTimeout(function(){
+            document.body.fade("out",5000);
+        },2000);
+    },
+    '(computer) please come back': function() {
+        say("Fine.","");
+        document.body.fade("in",5000);
+    },
+    '(computer) come back': function() {
+        say("Okay.","");
+        document.body.fade("in",3000);
+        setTimeout(function(){
+            say("Wait!","");
+            document.body.fade("out",1000);
+            setTimeout(function(){
+                say("You didn't say please!","");
+            },1000);
+        },3000);
+    },
+    'notify :notiftext (in :mins) (minute) (minutes) (and :seconds) (second) (seconds)': function(notiftext,mins,seconds) {
+        if (typeof mins === "undefined") {
+            mins = 0;
+        }
+        if (typeof seconds === "undefined") {
+            seconds = 0;
+        }
+        if (mins != 0 && seconds == 0) {
+            say("Notifying you in "+mins+" minutes.");
+            setInterval(function(){
+                notify(notiftext);
+            },(mins*60)*1000);
+        }
+        if (seconds != 0 && mins == 0) {
+            say("Notifying you in "+seconds+" seconds.");
+             setInterval(function(){
+                notify(notiftext);
+            },seconds*1000);
+        }
+        if (seconds != 0 && mins != 0) {
+            say("Notifying you in "+mins+" minutes and "+seconds+" seconds.");
+             setInterval(function(){
+                notify(notiftext);
+            },((mins*60)*1000)+(seconds*1000));
+        }
+    },
+    '(please) (computer) (please) do you love siri': function() {
+        slowersay("No","");
+        setTimeout(function(){say("Well, maybe.","");},2000);
+    },
+    '(please) (computer) (please) do you have a crush on Siri': function() {
+        slowersay("No","");
+        setTimeout(function(){say("Well, maybe.","");},2000);
     },
     '(please) (computer) (please) say hello to *name': function(name) {
         var utterance = new SpeechSynthesisUtterance();
@@ -165,6 +263,10 @@ console.log("Annyang started sucessfully");
     },
 
     '(please) (computer) (please) hello (world)': function() {
+        say("Hello to you too!","");
+    },
+
+    '(please) (computer) (please) hi (world)': function() {
         say("Hello to you too!","");
     },
 
@@ -254,6 +356,37 @@ console.log("Annyang started sucessfully");
         speechSynthesis.speak(utterance);
     },
 
+    'What is :num1 :operation :num2 (:opt3)': function(num1,operation,num2,opt3) {
+        console.log(num1+" "+operation+" "+num2);
+
+        try{
+            Number(num1)+Number(num2)
+
+        if (num2 == "by") {
+            try{
+                Number(num1)+Number(num2)
+                say("The answer is "+Number(num1)/Number(opt3));
+            } catch(e){say("Please give me a number, stupid!")}
+        } else {
+            switch (operation) {
+                case "plus":
+                    say("The answer is "+Number(num1)+Number(num2)+".");
+                    break;
+                case "minus":
+                    say("The answer is "+Number(num1)-Number(num2)+".");
+                    break;
+                case "times":
+                    say("The answer is "+Number(num1)*Number(num2)+".");
+                    break;
+                default:
+                    say("The answer is "+Number(num1)/Number(num2)+".");
+                    break;
+            }
+        }
+
+    }catch(e){say("Please give me a number, stupid!")}
+    },
+
     '(please) (computer) (please) (generate) (create) (a) (another) backround': function() {
     var pattern = Trianglify({
         height: window.innerHeight,
@@ -277,6 +410,7 @@ tcanvas.id = "trianglify";
     '(please) (computer) (please) search (on the internet) for *search': function(search) {
         // old, error thrown but works: bootbox.alert(searchFlickr(search)); say("Here you are!");
         searchFlickr(search); //search from custom function that pushes images from public feed (no key reqd.) to bootbox dialog. look towards bottom or document for function
+        say("Here you are!");
     },
 
     '(computer) i like it': function() {
@@ -305,7 +439,27 @@ tcanvas.id = "trianglify";
     },
 
     'computer': function() {
+        if (Math.random(0,2) > 0.6) {
+            say("yes?","");
+        } else {
+            slowersay("What's up?","");
+        }
+    },
+
+    '(raspberry) pie': function() {
     say("yes?","");
+    },
+
+    '(computer) stop making that goddam dinging noise': function() {
+    notif("Well, okay then.","false");
+    },
+
+    '(computer) no noise on (alert) (alerts)': function() {
+    notif("Okay!","false");
+    },
+
+    '(computer) play a noise on (alert) (alerts)': function() {
+    notif("Okay!","false");
     },
 
     '(please) (computer) (please) (generate) (shine) (generation) Jas logo': function() {
@@ -435,7 +589,9 @@ window.addEventListener('mousemove', function(event) {//listener to change light
      }
 
      var say = function(text,voice) { //DO NOT DELETE this function, all of the talking depends on it
-        if (voice == "" || voice == "undefined" || voice == "null") {voice = defaultvoice;}
+        if (voice == "" || voice == "undefined" || voice == "null" || voice === undefined) {voice = defaultvoice;
+            console.warn("Make sure to provide a voice!")
+        }
         var utterance = new SpeechSynthesisUtterance();
         utterance.text = text;
         utterance.lang = voice;
@@ -451,6 +607,10 @@ window.addEventListener('mousemove', function(event) {//listener to change light
         utterance.rate = 0.9; 
         speechSynthesis.speak(utterance);
      }
+
+     function sequenceCallback(gpio, data) {
+        slowersay("sequence on g p i o pin" + gpio + " finished with response" + data,"");
+    }
 
     annyang.addCommands(commands); //add commands
 
@@ -584,6 +744,7 @@ START OF CONSOLE WELCOME MESSAGE
 */
 var version = JSON.parse(data);
 version = version[0].version;
+document.getElementById("info").innerHTML = "A!B Version: "+version+", code written by Aaron Becker";
 if(consolestyling == "debug") {
 console.info('%c %cW%ce%cl%cc%co%cm%ce %ct%co %ct%ch%ce %cS%ce%cc%cu%cr%ce %cL%co%cg%ci%cn %cP%ca%cn%ce%cl%c, %cb%cy %cA%ca%cr%co%cn %cB%ce%cc%ck%ce%cr%c, %cB%ce%ct%ca %cV%c%s%c%s ' , 'background: #222;' , 'background: #222; color: #FF0000', 'background: #222; color: #FF8000' , 'background: #222; color: #FFFF00', 'background: #222; color: #40FF00', 'background: #222; color: #0080FF' , 'background: #222; color: #4000FF' , 'background: #222; color: #BF00FF' , 'background: #222; color: #FF0000' , 'background: #222; color: #FF8000' , 'background: #222; color: #FFFF00', 'background: #222; color: #40FF00', 'background: #222; color: #0080FF' , 'background: #222; color: #4000FF' , 'background: #222; color: #BF00FF' , 'background: #222; color: #FF0000', 'background: #222; color: #FF8000' , 'background: #222; color: #FFFF00', 'background: #222; color: #40FF00', 'background: #222; color: #0080FF' , 'background: #222; color: #4000FF' , 'background: #222; color: #BF00FF' , 'background: #222; color: #FF0000', 'background: #222; color: #FF8000' , 'background: #222; color: #FFFF00', 'background: #222; color: #40FF00', 'background: #222; color: #0080FF' , 'background: #222; color: #4000FF' , 'background: #222; color: #BF00FF', 'background: #222; color: #FF0000', 'background: #222; color: #FF8000' , 'background: #222; color: #FFFF00', 'background: #222; color: #40FF00', 'background: #222; color: #0080FF' , 'background: #222; color: #4000FF' , 'background: #222; color: #BF00FF', 'background: #222; color: #FF0000', 'background: #222; color: #FF8000' , 'background: #222; color: #FFFF00', 'background: #222; color: #40FF00', 'background: #222; color: #0080FF' , 'background: #222; color: #4000FF' , 'background: #222; color: #BF00FF', 'background: #222; color: #FF0000', 'background: #222; color: #FF8000' , 'background: #222; color: #FFFF00', 'background: #222; color: #40FF00', 'background: #222; color: #0080FF' , 'background: #222; color: #4000FF' , 'background: #222; color: #BF00FF' , version.substring(0,1).toString() , 'background: #222; color: #FF0000' , version.substring(1,2).toString());
 } else {
@@ -700,7 +861,7 @@ function notify(notif,newpermissions) {
     }
 }
 }
-setTimeout(function(){notify("Test notification!","true");},200);
+if (testNotification){setTimeout(function(){notify("Test notification!","true");},200);}
 /*
 END OF NOTIFICATION IMPLEMENTATION
 */
@@ -708,10 +869,11 @@ END OF NOTIFICATION IMPLEMENTATION
 <script id="init">
 //init stuff
 var tcanvas = document.getElementById('tcanvas');
-var dimensions = tcanvas.getClientRects()[0];
+tcanvas.style.height = document.body.scrollHeight;
+tcanvas.style.width = document.body.scrollWidth;
 var pattern = Trianglify({
-        height: dimensions.height-3,//for the border of orange (2px, 1px for padding)
-        width: dimensions.width-3,
+        height: document.body.scrollHeight+10,//for the border of orange (2px, 1px for padding)
+        width: document.body.scrollWidth-3,
         cell_size: 40,
         variance: 1,
         x_colors: 'random'
@@ -756,5 +918,27 @@ window.addEventListener('mousemove', function(event) {//listener to change light
   shineA.light.position.y = event.clientY;
   shineA.draw();
 }, false);
+
+window.addEventListener("resize",function(){
+    if (reloadOnResize) {
+        say("reloading because the window was resized",""); 
+        setTimeout(function(){
+            window.location.reload(true);
+        },2200);
+    } else {
+
+        var pattern = Trianglify({
+        height: document.body.scrollHeight,
+        width: document.body.scrollWidth,
+        cell_size: 40,
+        variance: 1,
+        x_colors: 'random'
+    });
+    var tcanvas = pattern.canvas();
+    tcanvas.id = "trianglify";
+    document.body.appendChild(tcanvas);
+    }
+});
+
 </script>
 </html>
